@@ -1,0 +1,5 @@
+# Ignore all PNG files in the repo
+*.png
+
+# Ignore entire folder (with all files inside)
+DataProcessing/raw_data/
