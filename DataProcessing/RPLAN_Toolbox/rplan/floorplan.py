@@ -54,19 +54,23 @@ class Floorplan():
         self.front_door = np.array(region.bbox,dtype=int)
 
     def _get_exterior_boundary(self):
+        # Make sure we know the front door
         if self.front_door is None: self._get_front_door()
         self.exterior_boundary = []
 
+        # Get bounding box of the whole building from boundary mask
         min_h,max_h = np.where(np.any(self.boundary,axis=1))[0][[0,-1]]
         min_w,max_w = np.where(np.any(self.boundary,axis=0))[0][[0,-1]]
+
+        # Expand the bounding box slightly (+10) to avoid cutting edges
         min_h = max(min_h-10,0)
         min_w = max(min_w-10,0)
         max_h = min(max_h+10,self.h)
         max_w = min(max_w+10,self.w)
 
-        # src: http://staff.ustc.edu.cn/~fuxm/projects/DeepLayout/index.html
-        # search direction:0(right)/1(down)/2(left)/3(up)
-        # find the left-top point
+        # ---- Boundary tracing algorithm ----
+        # search direction: 0(right), 1(down), 2(left), 3(up)
+        # Find the first interior pixel (top-left corner inside the house)
         flag = False
         for h in range(min_h, max_h):
             for w in range(min_w, max_w):
@@ -77,8 +81,11 @@ class Floorplan():
             if flag:
                 break
         
-        # left/top edge: inside
-        # right/bottom edge: outside
+        # ---- Boundary walking loop ----
+        # Rules: 
+        #   - left/top edge = "inside"
+        #   - right/bottom edge = "outside"
+        #   - corner_sum trick (sum == odd number) decides to turn direction
         while(flag):
             if self.exterior_boundary[-1][2] == 0:
                 for w in range(self.exterior_boundary[-1][1]+1, max_w):
@@ -152,12 +159,14 @@ class Floorplan():
                         new_point = (h, self.exterior_boundary[-1][1], 2)
                         break
 
+            # Stop when loop closes back at start point
             if new_point != self.exterior_boundary[0]:
                 self.exterior_boundary.append(new_point)
             else:
                 flag = False
-        self.exterior_boundary = [[r,c,d,0] for r,c,d in self.exterior_boundary]
+        self.exterior_boundary = [[row,col,direction,0] for row,col,direction in self.exterior_boundary]
         
+        # ---- Insert the front door into boundary ----
         door_y1,door_x1,door_y2,door_x2 = self.front_door
         door_h,door_w = door_y2-door_y1,door_x2-door_x1
         is_vertical = door_h>door_w or door_h==1 # 
@@ -166,6 +175,8 @@ class Floorplan():
         door_index = None
         new_p = []
         th = 3
+
+        # Iterate over boundary edges to see where the door intersects
         for i in range(len(self.exterior_boundary)):
             y1,x1,d,_ = self.exterior_boundary[i]
             y2,x2,_,_ = self.exterior_boundary[(i+1)%len(self.exterior_boundary)] 
@@ -201,9 +212,10 @@ class Floorplan():
         rooms = []
         regions = measure.regionprops(self.instance)
         for region in regions:
-            c = stats.mode(self.category[region.coords[:,0],region.coords[:,1]])[0][0]
+            a = self.category[region.coords[:,0],region.coords[:,1]]
+            c = stats.mode(a).mode
             y0,x0,y1,x1 = np.array(region.bbox) 
-            rooms.append([y0,x0,y1,x1,c])
+            rooms.append([y0,x0,y1,x1,c])   # [y_min, x_min, y_max, x_max]
         self.rooms = np.array(rooms,dtype=int)
 
     def _get_edges(self,th=9):

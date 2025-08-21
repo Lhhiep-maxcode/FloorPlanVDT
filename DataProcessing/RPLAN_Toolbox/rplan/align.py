@@ -5,9 +5,10 @@ import os
 eng = engine.start_matlab()
 eng.addpath(os.path.join(os.path.dirname(__file__),'matlab'),nargout=0)
 
-GT_ThRESHOLD = 6
-PRED_ThRESHOLD = 12
-REFINE_ThRESHOLD = 18
+# thresholds used for alignment in different contexts
+GT_ThRESHOLD = 6      # for ground-truth alignment
+PRED_ThRESHOLD = 12   # for coarse prediction alignment
+REFINE_ThRESHOLD = 18 # for fine refinement alignment
 
 def align_fp(boundary, boxes, types, edges, image, threshold, dtype=int):
     boundary = np.array(boundary,dtype=int).tolist()
@@ -25,9 +26,11 @@ def align_fp(boundary, boxes, types, edges, image, threshold, dtype=int):
         threshold,False,nargout=3
     )
 
+    # Convert MATLAB outputs back to numpy
     boxes_aligned   = np.array(boxes_aligned,dtype=dtype)
+    # NOTE: MATLAB uses 1-based indexing, subtract 1 to match Python’s 0-based indexing
     order           = np.array(order,dtype=dtype).reshape(-1)-1
-    room_boundaries = np.array([np.array(rb,dtype=float) for rb in room_boundaries]) # poly with hole has value 'nan'
+    room_boundaries = np.array([np.array(rb,dtype=float) for rb in room_boundaries], dtype=object) # poly with hole has value 'nan'
 
     return boxes_aligned, order, room_boundaries
 
