@@ -20,7 +20,8 @@ def compute_tf(boundary):
     for i in range(num_point):
         z = np.cross(line_vector[i],line_vector[(i+1)%num_point])
         sign = np.sign(z)
-        angles[i] = np.arccos(np.dot(line_vector[i],line_vector[(i+1)%num_point]))*sign
+        # Lưu ý phần này đã được chỉnh sửa bởi ban đầu tính góc chỉ đúng với vector vuông góc nhau
+        angles[i] = np.arccos(np.dot(line_vector[i],line_vector[(i+1)%num_point]) / (line_length[i] * line_length[(i + 1)%num_point]))*sign
 
     x = np.zeros(num_point+1)
     y = np.zeros(num_point+1)
