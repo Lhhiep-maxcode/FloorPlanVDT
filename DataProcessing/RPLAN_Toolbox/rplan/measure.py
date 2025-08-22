@@ -41,6 +41,21 @@ def sample_tf(x,y,ndim=1000):
     t = np.linspace(0,1,ndim)
     return np.piecewise(t,[t>=xx for xx in x],y)
 
+def compute_tf_dist(tf1,tf2):
+    x = np.unique(np.concatenate((tf1['x'],tf2['x'])))
+    dist = 0
+    idx1,idx2 =0,0
+    for i in range(1,len(x)-1):
+        idx1 = idx1+(x[i]>tf1['x'][idx1+1])
+        idx2 = idx2+(x[i]>tf2['x'][idx2+1])
+        seg = x[i]-x[i-1]
+        d = abs(tf1['y'][idx1]-tf2['y'][idx2])
+        dist = dist+seg*d
+    seg = x[-1]-x[-2]
+    d = abs(tf1['y'][-1]-tf2['y'][-1])
+    dist = dist+seg*d
+    return dist
+
 class TFRetriever():
     def __init__(self,tf,tf_centroids,tf_clusters):
         '''

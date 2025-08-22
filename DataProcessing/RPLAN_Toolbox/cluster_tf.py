@@ -23,7 +23,7 @@ niter = 200         # number of iterations
 verbose = True
 
 # Initialize FAISS KMeans (GPU-accelerated)
-kmeans = faiss.Kmeans(d, ncentroids, niter=niter, verbose=verbose,gpu=False)
+kmeans = faiss.Kmeans(d, ncentroids, niter=niter, verbose=verbose)
 # Train KMeans on the turning function vectors
 kmeans.train(tf)
 # Cluster centroids (the "average" TFs for each cluster)
