@@ -5,3 +5,5 @@
 DataProcessing/raw_data/
 __pycache__/
 
+experiment/
+.vscode/
