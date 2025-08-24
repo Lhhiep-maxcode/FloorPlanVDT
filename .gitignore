@@ -9,6 +9,9 @@
 !5.jpg
 !6.jpg
 
+*.pkl
+*.mat
+
 # Ignore entire folder (with all files inside)
 __pycache__/
 
