@@ -1,8 +1,15 @@
 # Ignore all PNG files in the repo
 *.png
+!0.png
+!1.png
+!2.png
+
+*.jpg
+!2.jpg
+!5.jpg
+!6.jpg
 
 # Ignore entire folder (with all files inside)
-DataProcessing/raw_data/
 __pycache__/
 
 experiment/
