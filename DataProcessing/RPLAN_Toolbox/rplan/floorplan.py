@@ -180,7 +180,7 @@ class Floorplan():
         for i in range(len(self.exterior_boundary)):
             y1,x1,d,_ = self.exterior_boundary[i]
             y2,x2,_,_ = self.exterior_boundary[(i+1)%len(self.exterior_boundary)] 
-            if is_vertical!=d%2: continue
+            if is_vertical!=d%2: continue       # check down/up for vertical or left/right for non-vertical first
             if is_vertical and (x1-th<door_x1<x1+th or x1-th<door_x2<x1+th): # 1:down 3:up
                 l1 = geometry.LineString([[y1,x1],[y2,x2]])    
                 l2 = geometry.LineString([[door_y1,x1],[door_y2,x1]])  
